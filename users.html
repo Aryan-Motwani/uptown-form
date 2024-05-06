@@ -122,6 +122,17 @@
       });
 
       console.log(sortedData);
+
+      let todyDate = new Date().getDay();
+      let todayMonth = new Date().getMonth();
+      for (let i = 0; i < sortedData.length; i++) {
+        console.log(sortedData[i].dob.split("-")[0]);
+        if (sortedData[i].dob.split("-")[0] >= todayMonth) {
+          if (sortedData[i].dob.split("-")[1] >= todyDate)
+            console.log(sortedData[i]);
+          return;
+        }
+      }
     });
 
     setTimeout(() => {
