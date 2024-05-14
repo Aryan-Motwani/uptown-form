@@ -73,6 +73,8 @@
       appId: "1:215634717165:web:3cad47469b0fed4b96dfe4",
     };
 
+    let sorted = false;
+
     let users = [];
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
@@ -95,9 +97,9 @@
             tr.innerHTML = `
       <td>${user.username}</td>
       <td>${user.num}</td>
-      <td>${user.dob}</td>
+      <td>${user.dob.split("-")[2] + "-" + user.dob.split("-")[1]}</td>
     `;
-            document.querySelector("table").append(tr);
+            document.querySelector("tbody").append(tr);
           });
         } else {
           console.log("No users found");
@@ -123,15 +125,52 @@
 
       console.log(sortedData);
 
-      let todyDate = new Date().getDay();
-      let todayMonth = new Date().getMonth();
-      for (let i = 0; i < sortedData.length; i++) {
-        console.log(sortedData[i].dob.split("-")[0]);
-        if (sortedData[i].dob.split("-")[0] >= todayMonth) {
-          if (sortedData[i].dob.split("-")[1] >= todyDate)
-            console.log(sortedData[i]);
-          return;
+      let todyDate = new Date().getDate();
+      let todayMonth = new Date().getMonth() + 1;
+
+      if (sorted) {
+        return;
+        document.querySelector("tbody").innerHTML = "";
+        console.log("data");
+        console.log(users);
+        data.forEach((user) => {
+          tr = document.createElement("tr");
+          tr.innerHTML = `
+                <td>${user.username}</td>
+                <td>${user.num}</td>
+                <td>${
+                  user.dob.split("-")[1] + "-" + user.dob.split("-")[0]
+                }</td>
+              `;
+          document.querySelector("tbody").append(tr);
+        });
+        sorted = false;
+        return;
+      } else {
+        for (let i = 0; i < sortedData.length; i++) {
+          if (sortedData[i].dob.split("-")[0] >= todayMonth) {
+            if (sortedData[i].dob.split("-")[1] >= todyDate) {
+              let newArr = sortedData.slice(i).concat(sortedData.slice(0, i));
+
+              console.log(sorted);
+              document.querySelector("tbody").innerHTML = "";
+              newArr.forEach((user) => {
+                tr = document.createElement("tr");
+                tr.innerHTML = `
+                <td>${user.username}</td>
+                <td>${user.num}</td>
+                <td>${
+                  user.dob.split("-")[1] + "-" + user.dob.split("-")[0]
+                }</td>
+              `;
+                document.querySelector("tbody").append(tr);
+              });
+              sorted = true;
+              return;
+            }
+          }
         }
+        sorted = true;
       }
     });
 
