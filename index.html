@@ -6,44 +6,43 @@
 
 <style>
 body{
-    font-family: Arial;
-    padding:20px;
+font-family:Arial;
+padding:20px;
+background:#fafafa;
 }
 
 #grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
-    gap:15px;
-    margin-top:20px;
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+gap:15px;
+margin-top:20px;
 }
 
 .card{
-    border-radius:10px;
-    overflow:hidden;
-    background:#f4f4f4;
-}
-
-.card img{
-    width:100%;
-    display:block;
+background:white;
+border-radius:10px;
+padding:15px;
+box-shadow:0 2px 6px rgba(0,0,0,0.1);
+text-align:center;
 }
 
 .card a{
-    text-decoration:none;
-    color:black;
-    font-size:12px;
-    padding:6px;
-    display:block;
+text-decoration:none;
+color:white;
+background:#E1306C;
+padding:8px 12px;
+border-radius:6px;
+display:inline-block;
+margin-top:10px;
 }
 
 #loadMore{
-    margin-top:20px;
-    padding:10px 20px;
-    font-size:16px;
-    cursor:pointer;
+margin-top:20px;
+padding:10px 20px;
+font-size:16px;
+cursor:pointer;
 }
 </style>
-
 </head>
 
 <body>
@@ -57,84 +56,71 @@ body{
 
 <script>
 
-let instaLinks = [];
-let index = 0;
-const batchSize = 10;
-
-function extractPostId(url){
-
-    let parts = url.split("/");
-    return parts[4]; // works for /p/ and /reel/
-
-}
+let instaLinks=[];
+let index=0;
+const batchSize=10;
 
 function renderPosts(){
 
-    const grid = document.getElementById("grid");
+const grid=document.getElementById("grid");
 
-    const nextItems = instaLinks.slice(index, index + batchSize);
+const items=instaLinks.slice(index,index+batchSize);
 
-    nextItems.forEach(link => {
+items.forEach(link=>{
 
-        const postId = extractPostId(link);
+const card=document.createElement("div");
+card.className="card";
 
-        const thumb = `https://www.instagram.com/p/${postId}/media/?size=l`;
+card.innerHTML=`
+<div>Instagram Post</div>
+<a href="${link}" target="_blank">Open</a>
+`;
 
-        const card = document.createElement("div");
-        card.className = "card";
-
-        card.innerHTML = `
-            <a href="${link}" target="_blank">
-                <img src="${thumb}" loading="lazy">
-                Open Post
-            </a>
-        `;
-
-        grid.appendChild(card);
-
-    });
-
-    index += batchSize;
-
-    if(index >= instaLinks.length){
-        document.getElementById("loadMore").style.display = "none";
-    }
-
-}
-
-document.getElementById("fileInput").addEventListener("change", function(){
-
-    const file = this.files[0];
-    const reader = new FileReader();
-
-    reader.onload = function(e){
-
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(e.target.result,"text/html");
-
-        const links = [...doc.querySelectorAll("a")].map(a => a.href);
-
-        instaLinks = links.filter(link =>
-            link.includes("instagram.com/p/") ||
-            link.includes("instagram.com/reel/")
-        );
-
-        index = 0;
-        document.getElementById("grid").innerHTML = "";
-
-        renderPosts();
-
-        if(instaLinks.length > batchSize){
-            document.getElementById("loadMore").style.display = "block";
-        }
-
-    };
-
-    reader.readAsText(file);
+grid.appendChild(card);
 
 });
 
-document.getElementById("loadMore").addEventListener("click", renderPosts);
+index+=batchSize;
+
+if(index>=instaLinks.length){
+document.getElementById("loadMore").style.display="none";
+}
+
+}
+
+document.getElementById("fileInput").addEventListener("change",function(){
+
+const file=this.files[0];
+const reader=new FileReader();
+
+reader.onload=function(e){
+
+const parser=new DOMParser();
+const doc=parser.parseFromString(e.target.result,"text/html");
+
+const links=[...doc.querySelectorAll("a")].map(a=>a.href);
+
+instaLinks=links.filter(link=>
+link.includes("instagram.com/p/")||
+link.includes("instagram.com/reel/")
+);
+
+index=0;
+document.getElementById("grid").innerHTML="";
+
+renderPosts();
+
+if(instaLinks.length>batchSize){
+document.getElementById("loadMore").style.display="block";
+}
+
+};
+
+reader.readAsText(file);
+
+});
+
+document.getElementById("loadMore").addEventListener("click",renderPosts);
 
 </script>
 
