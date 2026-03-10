@@ -1,8 +1,8 @@
-<!DOCTYPE html>
+ancd<!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Instagram Link Extractor</title>
+<title>Instagram Thumbnail Extractor</title>
 
 <style>
 body{
@@ -13,27 +13,31 @@ background:#fafafa;
 
 #grid{
 display:grid;
-grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
-gap:15px;
+grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+gap:16px;
 margin-top:20px;
 }
 
 .card{
 background:white;
 border-radius:10px;
-padding:15px;
-box-shadow:0 2px 6px rgba(0,0,0,0.1);
-text-align:center;
+overflow:hidden;
+box-shadow:0 2px 6px rgba(0,0,0,0.15);
+}
+
+.card img{
+width:100%;
+display:block;
 }
 
 .card a{
+display:block;
+text-align:center;
+padding:8px;
 text-decoration:none;
-color:white;
 background:#E1306C;
-padding:8px 12px;
-border-radius:6px;
-display:inline-block;
-margin-top:10px;
+color:white;
+font-size:14px;
 }
 
 #loadMore{
@@ -43,6 +47,7 @@ font-size:16px;
 cursor:pointer;
 }
 </style>
+
 </head>
 
 <body>
@@ -60,25 +65,47 @@ let instaLinks=[];
 let index=0;
 const batchSize=10;
 
-function renderPosts(){
+async function getThumbnail(url){
+
+try{
+
+const res=await fetch(
+"https://api.allorigins.win/raw?url="+
+encodeURIComponent(
+`https://www.instagram.com/oembed/?url=${url}`
+)
+);
+
+const data=await res.json();
+return data.thumbnail_url;
+
+}catch{
+return null;
+}
+
+}
+
+async function renderPosts(){
 
 const grid=document.getElementById("grid");
 
 const items=instaLinks.slice(index,index+batchSize);
 
-items.forEach(link=>{
+for(const link of items){
+
+const thumb=await getThumbnail(link);
 
 const card=document.createElement("div");
 card.className="card";
 
 card.innerHTML=`
-<div>Instagram Post</div>
-<a href="${link}" target="_blank">Open</a>
+<img src="${thumb || ""}">
+<a href="${link}" target="_blank">Open Post</a>
 `;
 
 grid.appendChild(card);
 
-});
+}
 
 index+=batchSize;
 
