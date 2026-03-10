@@ -12,19 +12,40 @@ body{
 
 #grid{
     display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(350px,1fr));
-    gap:20px;
+    grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+    gap:15px;
     margin-top:20px;
 }
 
-iframe{
+.card{
+    border-radius:10px;
+    overflow:hidden;
+    background:#f4f4f4;
+}
+
+.card img{
     width:100%;
-    height:480px;
-    border:none;
+    display:block;
+}
+
+.card a{
+    text-decoration:none;
+    color:black;
+    font-size:12px;
+    padding:6px;
+    display:block;
+}
+
+#loadMore{
+    margin-top:20px;
+    padding:10px 20px;
+    font-size:16px;
+    cursor:pointer;
 }
 </style>
 
 </head>
+
 <body>
 
 <h2>Upload HTML File</h2>
@@ -32,7 +53,54 @@ iframe{
 
 <div id="grid"></div>
 
+<button id="loadMore" style="display:none;">Load More</button>
+
 <script>
+
+let instaLinks = [];
+let index = 0;
+const batchSize = 10;
+
+function extractPostId(url){
+
+    let parts = url.split("/");
+    return parts[4]; // works for /p/ and /reel/
+
+}
+
+function renderPosts(){
+
+    const grid = document.getElementById("grid");
+
+    const nextItems = instaLinks.slice(index, index + batchSize);
+
+    nextItems.forEach(link => {
+
+        const postId = extractPostId(link);
+
+        const thumb = `https://www.instagram.com/p/${postId}/media/?size=l`;
+
+        const card = document.createElement("div");
+        card.className = "card";
+
+        card.innerHTML = `
+            <a href="${link}" target="_blank">
+                <img src="${thumb}" loading="lazy">
+                Open Post
+            </a>
+        `;
+
+        grid.appendChild(card);
+
+    });
+
+    index += batchSize;
+
+    if(index >= instaLinks.length){
+        document.getElementById("loadMore").style.display = "none";
+    }
+
+}
 
 document.getElementById("fileInput").addEventListener("change", function(){
 
@@ -41,37 +109,32 @@ document.getElementById("fileInput").addEventListener("change", function(){
 
     reader.onload = function(e){
 
-        const html = e.target.result;
-
         const parser = new DOMParser();
-        const doc = parser.parseFromString(html,"text/html");
+        const doc = parser.parseFromString(e.target.result,"text/html");
 
         const links = [...doc.querySelectorAll("a")].map(a => a.href);
 
-        const instaLinks = links.filter(link =>
+        instaLinks = links.filter(link =>
             link.includes("instagram.com/p/") ||
             link.includes("instagram.com/reel/")
         );
 
-        const grid = document.getElementById("grid");
-        grid.innerHTML = "";
+        index = 0;
+        document.getElementById("grid").innerHTML = "";
 
-        instaLinks.forEach(link => {
+        renderPosts();
 
-            const embed = link + "embed";
-
-            const iframe = document.createElement("iframe");
-            iframe.src = embed;
-
-            grid.appendChild(iframe);
-
-        });
+        if(instaLinks.length > batchSize){
+            document.getElementById("loadMore").style.display = "block";
+        }
 
     };
 
     reader.readAsText(file);
 
 });
+
+document.getElementById("loadMore").addEventListener("click", renderPosts);
 
 </script>
 
