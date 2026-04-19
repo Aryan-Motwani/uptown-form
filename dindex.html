@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Beauty Shop Billing</title>
+
+<style>
+body{
+font-family: Arial;
+background:#f5f6f7;
+margin:0;
+}
+
+.header{
+background:#caa400;
+color:white;
+padding:12px;
+font-size:20px;
+font-weight:bold;
+}
+
+.container{
+padding:20px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+background:white;
+}
+
+th{
+background:#e6d26a;
+padding:10px;
+border:1px solid #ccc;
+}
+
+td{
+padding:8px;
+border:1px solid #ddd;
+text-align:center;
+}
+
+input{
+width:90%;
+padding:4px;
+text-align:center;
+}
+
+.code-cell{
+cursor:pointer;
+color:#c0392b;
+font-weight:bold;
+}
+
+.total-box{
+margin-top:20px;
+font-size:22px;
+font-weight:bold;
+text-align:right;
+}
+
+.empty-row{
+background:#fafafa;
+cursor:pointer;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+Beauty Shop Billing Screen
+</div>
+
+<div class="container">
+
+<table id="billTable">
+<thead>
+<tr>
+<th>Code</th>
+<th>Item Name</th>
+<th>MRP</th>
+<th>Qty</th>
+<th>Discount %</th>
+<th>Amount</th>
+</tr>
+</thead>
+
+<tbody id="billBody">
+
+<tr class="empty-row" onclick="addProductPrompt()">
+<td colspan="6">Click here to scan barcode / enter product code</td>
+</tr>
+
+</tbody>
+</table>
+
+<div class="total-box">
+Total: ₹ <span id="total">0</span>
+</div>
+
+</div>
+
+
+<script>
+
+//////////////////// PRODUCT DATABASE ////////////////////
+
+const products = {
+
+"101": {name:"Lakme Face Wash", price:220},
+"102": {name:"Nivea Soft Cream", price:299},
+"103": {name:"Maybelline Kajal", price:199},
+"104": {name:"Mamaearth Vitamin C Serum", price:499},
+"105": {name:"Biotique Shampoo", price:180},
+"106": {name:"Himalaya Neem Face Pack", price:150},
+"107": {name:"Lotus Sunscreen SPF50", price:395},
+"108": {name:"Garnier Micellar Water", price:225},
+"109": {name:"Ponds BB Cream", price:175},
+"110": {name:"Elle18 Lipstick", price:120}
+
+};
+
+
+//////////////////// ADD PRODUCT ////////////////////
+
+function addProductPrompt(){
+
+let code = prompt("Scan barcode or enter product code:");
+
+if(!code) return;
+
+if(!products[code]){
+alert("Product not found!");
+return;
+}
+
+addRow(code);
+
+}
+
+
+//////////////////// ADD ROW ////////////////////
+
+function addRow(code){
+
+const product = products[code];
+
+const table = document.getElementById("billBody");
+
+const row = document.createElement("tr");
+
+row.innerHTML = `
+
+<td class="code-cell" onclick="deleteRow(this)">
+${code}
+</td>
+
+<td>
+${product.name}
+</td>
+
+<td>
+${product.price}
+</td>
+
+<td>
+<input type="number" value="1"
+onchange="updateAmount(this)">
+</td>
+
+<td>
+<input type="number" value="0"
+onchange="updateAmount(this)">
+</td>
+
+<td class="amount">
+${product.price}
+</td>
+
+`;
+
+table.insertBefore(row, table.lastElementChild);
+
+updateTotal();
+
+}
+
+
+//////////////////// UPDATE AMOUNT ////////////////////
+
+function updateAmount(el){
+
+const row = el.parentElement.parentElement;
+
+const price = parseFloat(row.children[2].innerText);
+
+const qty = row.children[3].children[0].value;
+
+const discount = row.children[4].children[0].value;
+
+let amount = price * qty;
+
+amount = amount - (amount * discount / 100);
+
+row.children[5].innerText = amount.toFixed(2);
+
+updateTotal();
+
+}
+
+
+//////////////////// DELETE ROW ////////////////////
+
+function deleteRow(cell){
+
+if(confirm("Delete this item?")){
+
+cell.parentElement.remove();
+
+updateTotal();
+
+}
+
+}
+
+
+//////////////////// UPDATE TOTAL ////////////////////
+
+function updateTotal(){
+
+let total = 0;
+
+document.querySelectorAll(".amount").forEach(el => {
+
+total += parseFloat(el.innerText);
+
+});
+
+document.getElementById("total").innerText = total.toFixed(2);
+
+}
+
+</script>
+
+</body>
+</html>
